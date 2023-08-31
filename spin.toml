@@ -1,0 +1,44 @@
+spin_manifest_version = "1"
+authors = ["Mikkel Mørk Hegnhøj <mikkel@fermyon.com>"]
+description = "Demo app"
+name = "cph-demo"
+trigger = { type = "http", base = "/" }
+version = "0.1.0"
+
+[[component]]
+id = "rust"
+source = "rust/target/wasm32-wasi/release/rust.wasm"
+allowed_http_hosts = []
+key_value_stores = ["default"]
+[component.trigger]
+route = "/rust/..."
+[component.build]
+command = "cargo build --target wasm32-wasi --release"
+workdir = "rust"
+watch = ["src/**/*.rs", "Cargo.toml"]
+
+[[component]]
+source = { url = "https://github.com/radu-matei/spin-kv-explorer/releases/download/v0.9.0/spin-kv-explorer.wasm", digest = "sha256:07f5f0b8514c14ae5830af0f21674fd28befee33cd7ca58bc0a68103829f2f9c" }
+id = "kv-explorer"
+# add or remove stores you want to explore here
+key_value_stores = ["default"]
+[component.trigger]
+route = "/internal/kv-explorer/..."
+
+[[component]]
+id = "ts"
+source = "ts/target/ts.wasm"
+sqlite_databases = ["default"]
+[component.trigger]
+route = "/ts/..."
+[component.build]
+command = "npm run build"
+workdir = "ts"
+
+[[component]]
+source = { url = "https://github.com/fermyon/spin-fileserver/releases/download/v0.0.2/spin_static_fs.wasm", digest = "sha256:65456bf4e84cf81b62075e761b2b0afaffaef2d0aeda521b245150f76b96421b" }
+id = "static"
+environment = { FALLBACK_PATH = "index.html" }
+files = [ { source = "static/assets", destination = "/" } ]
+[component.trigger]
+route = "/..."
